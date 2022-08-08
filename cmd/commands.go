@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"sync"
+
 	"github.com/kokoichi206/go-git-stats/api"
 	"github.com/kokoichi206/go-git-stats/util"
 	"github.com/urfave/cli/v2"
@@ -10,6 +12,9 @@ import (
 type Cmd struct {
 	Config util.Config
 	Api    api.ApiCaller
+	Wait   *sync.WaitGroup
+	Mutex  *sync.Mutex
+	total  int
 }
 
 // Get all commands.

@@ -23,13 +23,13 @@ func (c *Cmd) LinesCommand() *cli.Command {
 // Get lines of codes you write before.
 func (c *Cmd) getLinesOfCodes(cc *cli.Context) error {
 
-	var rs []api.Repository
+	var repositories []api.Repository
 	var err error
 
 	// With Github access token
 	token := c.Config.Token
 	if token != "" {
-		rs, err = c.Api.ListRepositoriesForAuthenticatedUser()
+		repositories, err = c.Api.ListRepositoriesForAuthenticatedUser()
 		if err != nil {
 			return err
 		}
@@ -38,24 +38,45 @@ func (c *Cmd) getLinesOfCodes(cc *cli.Context) error {
 	// With username
 	userName := cc.String("name")
 	if userName != "" {
-		rs, err = c.Api.ListPublicRepositories(userName)
-		fmt.Println(rs)
+		repositories, err = c.Api.ListPublicRepositories(userName)
 		if err != nil {
 			return err
 		}
 	}
 
-	total := 0
-	for _, r := range rs {
-		st, err := c.Api.WeeklyCommitActivity(r.FullName)
-		if err == nil {
-			// Calculate the total amount of lines.
-			for _, s := range st {
-				total += s.Additions + s.Deletions
-			}
-		}
+	c.Wait.Add(len(repositories))
+	for _, repository := range repositories {
+		go c.WeeklyCommitActivityAsyncCall(repository.FullName)
 	}
-	fmt.Println(total)
+	c.Wait.Wait()
 
+	// Final output
+	fmt.Println(c.total)
 	return nil
+}
+
+// Asynchronous API (WeeklyCommitActivity) call and calculate the total lines of codes.
+func (c *Cmd) WeeklyCommitActivityAsyncCall(fullName string) {
+
+	// Always decrements the WaitGroup counter.
+	defer c.Wait.Done()
+
+	// Call function
+	stats, err := c.Api.WeeklyCommitActivity(fullName)
+	if err != nil {
+		return
+	}
+
+	// Calculate lines of codes of a specific repository.
+	total := 0
+	for _, s := range stats {
+		total += s.Additions + s.Deletions
+	}
+
+	// Add to total lines of codes.
+	c.Mutex.Lock()
+	c.total += total
+	c.Mutex.Unlock()
+
+	return
 }
