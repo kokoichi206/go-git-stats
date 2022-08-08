@@ -20,7 +20,7 @@ func (a *Api) ListPublicRepositories(userName string) ([]Repository, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", URL, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to http.NewRequest: %w", err)
 	}
 
 	// Set request header.
@@ -47,12 +47,12 @@ func (a *Api) ListPublicRepositories(userName string) ([]Repository, error) {
 	body, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to io.ReadAll: %w", err)
 	}
 
 	var repositories []Repository
 	if err := json.Unmarshal(body, &repositories); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to json.Unmarshal: %w", err)
 	}
 
 	return repositories, nil
@@ -72,7 +72,7 @@ func (a *Api) ListRepositoriesForAuthenticatedUser() ([]Repository, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", URL, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to http.NewRequest: %w", err)
 	}
 
 	// Set request header.
@@ -100,12 +100,12 @@ func (a *Api) ListRepositoriesForAuthenticatedUser() ([]Repository, error) {
 	body, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to io.ReadAll: %w", err)
 	}
 
 	var repositories []Repository
 	if err := json.Unmarshal(body, &repositories); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to json.Unmarshal: %w", err)
 	}
 
 	return repositories, nil
