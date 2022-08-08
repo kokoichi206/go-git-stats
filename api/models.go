@@ -6,3 +6,9 @@ type Repository struct {
 	Name     string `json:"name"`
 	FullName string `json:"full_name"`
 }
+
+type CodeFrequency struct {
+	Time      int
+	Additions int
+	Deletions int
+}
