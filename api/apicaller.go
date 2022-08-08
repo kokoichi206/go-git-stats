@@ -6,4 +6,5 @@ package api
 type ApiCaller interface {
 	ListPublicRepositories(userName string) ([]Repository, error)
 	ListRepositoriesForAuthenticatedUser() ([]Repository, error)
+	WeeklyCommitActivity(fullName string) ([]CodeFrequency, error)
 }

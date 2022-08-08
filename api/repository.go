@@ -77,7 +77,6 @@ func (a *Api) ListRepositoriesForAuthenticatedUser() ([]Repository, error) {
 
 	// Set request header.
 	req.Header.Add("Accept", "application/vnd.github+json")
-	a.config.Token = "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"
 	req.Header.Add("Authorization", fmt.Sprintf("token %s", a.config.Token))
 
 	var resp *http.Response
