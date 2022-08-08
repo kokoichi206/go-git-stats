@@ -9,7 +9,7 @@ type Api struct {
 	config util.Config
 }
 
-func New(config util.Config) *Api {
+func New(config util.Config) ApiCaller {
 	return &Api{
 		config: config,
 	}

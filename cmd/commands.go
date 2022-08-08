@@ -9,7 +9,7 @@ import (
 // struct that has information related to subcommands
 type Cmd struct {
 	Config util.Config
-	Api    *api.Api
+	Api    api.ApiCaller
 }
 
 // Get all commands.
