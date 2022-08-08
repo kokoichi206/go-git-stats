@@ -33,7 +33,7 @@ func (a *Api) ListPublicRepositories(userName string) ([]Repository, error) {
 		// If the StatusCode starts with 4, it is user's error,
 		// so it should not be retried.
 		if resp.StatusCode/100 == 4 {
-			return nil, err
+			return nil, fmt.Errorf("failed to client.Do: StatusCode is %d", resp.StatusCode)
 		}
 
 		if err != nil {
@@ -86,7 +86,7 @@ func (a *Api) ListRepositoriesForAuthenticatedUser() ([]Repository, error) {
 		// If the StatusCode starts with 4, it is user's error,
 		// so it should not be retried.
 		if resp.StatusCode/100 == 4 {
-			return nil, err
+			return nil, fmt.Errorf("failed to client.Do: StatusCode is %d", resp.StatusCode)
 		}
 
 		if err != nil {
