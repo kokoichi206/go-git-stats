@@ -17,5 +17,6 @@ func (c *Cmd) NewCommands() []*cli.Command {
 	return []*cli.Command{
 		c.RepoCommand(),
 		c.StatsCommand(),
+		c.LinesCommand(),
 	}
 }
