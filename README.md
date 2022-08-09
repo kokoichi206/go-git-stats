@@ -28,8 +28,8 @@ $ ggs r -n kokoichi206
 Get statistics of a specific repository.
 
 ```sh
-# Github access token should be set to GGS_TOKEN (environment variable)
-# when you get private repopsitory stats.
+# You need to set Github access token to GGS_TOKEN (environment variable)
+# if you want to get private repopsitory stats.
 $ echo $GGS_TOKEN
 > ghq_....
 
@@ -40,16 +40,16 @@ $ ggs s -name kokoichi206/go-git-stats
 
 ### _lines_
 
-Get statistics of a specific repository.
+Get lines of codes you wrote before.
 
 ```sh
-# Github access token should be set to GGS_TOKEN (environment variable)
-# when you get private repopsitory stats.
+# You need to set Github access token to GGS_TOKEN (environment variable)
+# if you want to get private repopsitory stats.
 $ echo $GGS_TOKEN
 > ghq_....
 # with access token
 $ ggs lines
-> 10452117
+> 11930741
 
 $ ggs lines -name kokoichi206
 > 10452117
