@@ -8,7 +8,7 @@ import (
 type MockApi struct {
 	config              util.Config
 	ListRepos           []api.Repository
-	ListCodeFreq        []api.CodeFrequency
+	ListCodeFreq        [][]api.CodeFrequency
 	Error               error
 	PublicCalled        bool
 	AuthenticatedCalled bool
@@ -34,9 +34,18 @@ func (a *MockApi) ListRepositoriesForAuthenticatedUser() ([]api.Repository, erro
 }
 
 func (a *MockApi) WeeklyCommitActivity(fullName string) ([]api.CodeFrequency, error) {
+
 	a.WeeklyCodeCalled = true
 	a.PassedFullName = fullName
-	return a.ListCodeFreq, a.Error
+
+	if a.Error != nil {
+		return nil, a.Error
+	}
+
+	// Shift ListCodeFreq
+	lcf := a.ListCodeFreq[0]
+	a.ListCodeFreq = a.ListCodeFreq[1:]
+	return lcf, a.Error
 }
 
 func New(config util.Config) *MockApi {

@@ -22,7 +22,7 @@ func (a *Api) WeeklyCommitActivity(fullName string) ([]CodeFrequency, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", URL, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to http.NewRequest: %w", err)
 	}
 
 	// Set request header.
@@ -38,7 +38,7 @@ func (a *Api) WeeklyCommitActivity(fullName string) ([]CodeFrequency, error) {
 		// If the StatusCode starts with 4, it is user's error,
 		// so it should not be retried.
 		if resp.StatusCode/100 == 4 {
-			return nil, err
+			return nil, fmt.Errorf("failed to client.Do: StatusCode is %d", resp.StatusCode)
 		}
 
 		if resp.StatusCode == 202 {
@@ -56,12 +56,12 @@ func (a *Api) WeeklyCommitActivity(fullName string) ([]CodeFrequency, error) {
 	body, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to io.ReadAll: %w", err)
 	}
 
 	var cf [][]int
 	if err := json.Unmarshal(body, &cf); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to json.Unmarshal: %w", err)
 	}
 
 	// MAYBE: there's better way.

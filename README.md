@@ -38,6 +38,26 @@ $ ggs stats -name kokoichi206/go-git-stats
 $ ggs s -name kokoichi206/go-git-stats
 ```
 
+### _lines_
+
+Get statistics of a specific repository.
+
+```sh
+# Github access token should be set to GGS_TOKEN (environment variable)
+# when you get private repopsitory stats.
+$ echo $GGS_TOKEN
+> ghq_....
+# with access token
+$ ggs lines
+> 10452117
+
+$ ggs lines -name kokoichi206
+> 10452117
+# abbreviation command
+$ ggs l -n kokoichi206
+> 10452117
+```
+
 ## INSTALLATION
 
 Built binaries are available from GitHub Releases.

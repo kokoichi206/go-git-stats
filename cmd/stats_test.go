@@ -35,13 +35,14 @@ func TestStatsCommand(t *testing.T) {
 			name:     "OK",
 			commands: []string{"", "stats", "-name", "kokoichi206/go-git-stats"},
 			setup: func() {
-				mockApi.ListCodeFreq = []api.CodeFrequency{
+				c.total = 0
+				mockApi.ListCodeFreq = append(mockApi.ListCodeFreq, []api.CodeFrequency{
 					{
 						Time:      1659830400,
 						Additions: 10_0000,
 						Deletions: 999,
 					},
-				}
+				})
 			},
 			assertion: func(t *testing.T, err error, api *mock.MockApi) {
 				require.NoError(t, err)
