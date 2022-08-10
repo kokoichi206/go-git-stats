@@ -64,6 +64,19 @@ Built binaries are available from GitHub Releases.
 
 https://github.com/kokoichi206/go-git-stats/releases
 
+### How to set environment varialbe
+
+**Linux**
+
+```sh
+# Write these two commands to .bashrc, .zshrc or etc. if you want.
+$ GGS_TOKEN=ghq_xxx
+$ export GGS_TOKEN
+
+# easier way
+$ GGS_TOKEN=ghq_pienpoyon ggs <sub-command>
+```
+
 ## LICENSE
 
 under [MIT License](./LICENSE).
