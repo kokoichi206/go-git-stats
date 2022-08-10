@@ -13,7 +13,7 @@ import (
 func (a *Api) ListPublicRepositories(userName string) ([]Repository, error) {
 
 	var (
-		URL     = fmt.Sprintf("https://api.github.com/users/%s/repos?per_page=100", userName)
+		URL     = fmt.Sprintf("%s/users/%s/repos?per_page=100", a.config.ApiBaseURL, userName)
 		retries = 3
 	)
 
@@ -65,7 +65,7 @@ func (a *Api) ListPublicRepositories(userName string) ([]Repository, error) {
 func (a *Api) ListRepositoriesForAuthenticatedUser() ([]Repository, error) {
 
 	var (
-		URL     = "https://api.github.com/user/repos?per_page=100"
+		URL     = fmt.Sprintf("%s/user/repos?per_page=100", a.config.ApiBaseURL)
 		retries = 3
 	)
 

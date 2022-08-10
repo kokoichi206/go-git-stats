@@ -14,7 +14,7 @@ import (
 func (a *Api) WeeklyCommitActivity(fullName string) ([]CodeFrequency, error) {
 
 	var (
-		URL         = fmt.Sprintf("https://api.github.com/repos/%s/stats/code_frequency", fullName)
+		URL         = fmt.Sprintf("%s/repos/%s/stats/code_frequency", a.config.ApiBaseURL, fullName)
 		retries     = 3
 		waitSeconds = 3 * time.Second
 	)
