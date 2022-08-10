@@ -6,14 +6,17 @@ import (
 
 // Configurations
 type Config struct {
-	Token string
+	Token      string
+	ApiBaseURL string
 }
 
+// Load configurations for actual usecase.
 func LoadConfig() Config {
 
 	token := os.Getenv("GGS_TOKEN")
 
 	return Config{
-		Token: token,
+		Token:      token,
+		ApiBaseURL: "https://api.github.com",
 	}
 }

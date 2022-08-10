@@ -61,6 +61,7 @@ $ ggs l -n kokoichi206
 ## INSTALLATION
 
 Built binaries are available from GitHub Releases.
+
 https://github.com/kokoichi206/go-git-stats/releases
 
 ## LICENSE
