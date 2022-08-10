@@ -565,3 +565,39 @@ const unAuthorizedRequestMessage = `{
   "message": "Requires authentication",
   "documentation_url": "https://docs.github.com/rest/reference/repos#list-repositories-for-the-authenticated-user"
 }`
+
+const mockCodeFrequencies = `[
+	[
+	  1625961600,
+	  4381719,
+	  -9488
+	],
+	[
+	  1626566400,
+	  23550,
+	  -208
+	],
+	[
+	  1627171200,
+	  3375,
+	  -813
+	]
+]`
+
+const codeFrequenciesUnmarshalError = `[
+	[
+	  1625961600,
+	  4381719,
+	  -9488
+	],
+	[
+	  1626566400,
+	  23550,
+	  -208
+	],
+	[
+	  "1627171200",
+	  "3375",
+	  -813
+	]
+]`
