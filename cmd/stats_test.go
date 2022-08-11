@@ -13,7 +13,7 @@ import (
 
 func TestStatsCommand(t *testing.T) {
 
-	config := util.LoadConfig()
+	config, _ := util.LoadConfig()
 	mockApi := mock.New(config)
 
 	c := Cmd{
