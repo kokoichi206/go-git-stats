@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kokoichi206/go-git-stats/api"
 	"github.com/kokoichi206/go-git-stats/util"
 	"github.com/stretchr/testify/require"
 )
@@ -25,15 +26,14 @@ func TestListPublicRepositories(t *testing.T) {
 	config := util.Config{
 		ApiBaseURL: ts.server.URL,
 	}
-	api := Api{
-		config: config,
-	}
+	// a := api.New(config)
+	a := api.ExportNewApi(config)
 
 	testCases := []struct {
 		name      string
 		userName  string
 		setup     func(testServer *httptest.Server)
-		assertion func(t *testing.T, err error, repositories []Repository)
+		assertion func(t *testing.T, err error, repositories []api.Repository)
 		tearDown  func()
 	}{
 		{
@@ -42,7 +42,7 @@ func TestListPublicRepositories(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusOK, mockRepositories)
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.NoError(t, err)
 				t.Log(repositories)
@@ -81,11 +81,11 @@ func TestListPublicRepositories(t *testing.T) {
 			name:     "Error NewRequest",
 			userName: "kokoichi206",
 			setup: func(testServer *httptest.Server) {
-				t.Log(api.config.ApiBaseURL)
-				api.config.ApiBaseURL = "https://test.ser ver.com"
-				t.Log(api.config.ApiBaseURL)
+				t.Log(a.ExportGetConfig())
+				a.ExportSetURL("https://test.ser ver.com")
+				t.Log(a.ExportGetConfig())
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.Error(t, err)
 				t.Log(err)
@@ -97,18 +97,18 @@ func TestListPublicRepositories(t *testing.T) {
 				require.Equal(t, 0, ts.apiCalled)
 			},
 			tearDown: func() {
-				api.config.ApiBaseURL = ts.server.URL
+				a.ExportSetURL(ts.server.URL)
 			},
 		},
 		{
 			name:     "Error not http scheme",
 			userName: "kokoichi206",
 			setup: func(testServer *httptest.Server) {
-				t.Log(api.config.ApiBaseURL)
-				api.config.ApiBaseURL = "slack://should.return.client.do.err"
-				t.Log(api.config.ApiBaseURL)
+				t.Log(a.ExportGetConfig())
+				a.ExportSetURL("slack://should.return.client.do.err")
+				t.Log(a.ExportGetConfig())
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.Error(t, err)
 				t.Log(err)
@@ -118,7 +118,7 @@ func TestListPublicRepositories(t *testing.T) {
 				require.Equal(t, 0, ts.apiCalled)
 			},
 			tearDown: func() {
-				api.config.ApiBaseURL = ts.server.URL
+				a.ExportSetURL(ts.server.URL)
 			},
 		},
 		{
@@ -127,7 +127,7 @@ func TestListPublicRepositories(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusNotFound, "")
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.Error(t, err)
 				require.True(t, strings.Contains(err.Error(), "client.Do"))
@@ -149,7 +149,7 @@ func TestListPublicRepositories(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusInternalServerError, "")
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.Error(t, err)
 				require.True(t, strings.Contains(err.Error(), "failed to client.Do after several retries."))
@@ -166,7 +166,7 @@ func TestListPublicRepositories(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusOK, mockRepositoriesWithEmpty)
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.Error(t, err)
 				require.True(t, strings.Contains(err.Error(), "json.Unmarshal"))
@@ -191,10 +191,10 @@ func TestListPublicRepositories(t *testing.T) {
 			// Arrange
 			tc.setup(ts.server)
 			defer tc.tearDown()
-			defer ts.Init()
+			defer ts.init()
 
 			// Act
-			repositories, err := api.ListPublicRepositories(tc.userName)
+			repositories, err := a.ListPublicRepositories(tc.userName)
 
 			// Assert
 			tc.assertion(t, err, repositories)
@@ -217,15 +217,13 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 		ApiBaseURL: ts.server.URL,
 		Token:      "ghq_kokoichi206token",
 	}
-	api := Api{
-		config: config,
-	}
+	a := api.ExportNewApi(config)
 
 	testCases := []struct {
 		name      string
 		userName  string
 		setup     func(testServer *httptest.Server)
-		assertion func(t *testing.T, err error, repositories []Repository)
+		assertion func(t *testing.T, err error, repositories []api.Repository)
 		tearDown  func()
 	}{
 		{
@@ -234,7 +232,7 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusOK, mockRepositories)
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.NoError(t, err)
 				t.Log(repositories)
@@ -276,10 +274,10 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 			name:     "Error NewRequest",
 			userName: "kokoichi206",
 			setup: func(testServer *httptest.Server) {
-				api.config.ApiBaseURL = "https://test.ser ver.com"
+				a.ExportSetURL("https://test.ser ver.com")
 				ts.server.Config.Handler = ts.NewRouter(http.StatusNotFound, "")
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.Error(t, err)
 				t.Log(err)
@@ -291,25 +289,25 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 				require.Equal(t, 0, ts.apiCalled)
 			},
 			tearDown: func() {
-				api.config.ApiBaseURL = ts.server.URL
+				a.ExportSetURL(ts.server.URL)
 			},
 		},
 		{
 			name:     "Error not http scheme",
 			userName: "kokoichi206",
 			setup: func(testServer *httptest.Server) {
-				t.Log(api.config.ApiBaseURL)
-				api.config.ApiBaseURL = "slack://should.return.client.do.err"
-				t.Log(api.config.ApiBaseURL)
+				t.Log(a.ExportGetConfig())
+				a.ExportSetURL("slack://should.return.client.do.err")
+				t.Log(a.ExportGetConfig())
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.Error(t, err)
 				t.Log(err)
 				require.Equal(t, "failed to client.Do after several retries.", err.Error())
 			},
 			tearDown: func() {
-				api.config.ApiBaseURL = ts.server.URL
+				a.ExportSetURL(ts.server.URL)
 			},
 		},
 		{
@@ -318,7 +316,7 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusNotFound, "")
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.Error(t, err)
 				require.True(t, strings.Contains(err.Error(), "client.Do"))
@@ -337,7 +335,7 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusInternalServerError, "")
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.Error(t, err)
 				require.True(t, strings.Contains(err.Error(), "failed to client.Do after several retries."))
@@ -354,7 +352,7 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusOK, mockRepositoriesWithEmpty)
 			},
-			assertion: func(t *testing.T, err error, repositories []Repository) {
+			assertion: func(t *testing.T, err error, repositories []api.Repository) {
 
 				require.Error(t, err)
 				require.True(t, strings.Contains(err.Error(), "json.Unmarshal"))
@@ -377,11 +375,10 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 			// Arrange
 			tc.setup(ts.server)
 			defer tc.tearDown()
-			defer ts.Init()
+			defer ts.init()
 
 			// Act
-			t.Log(api)
-			repositories, err := api.ListRepositoriesForAuthenticatedUser()
+			repositories, err := a.ListRepositoriesForAuthenticatedUser()
 
 			// Assert
 			tc.assertion(t, err, repositories)

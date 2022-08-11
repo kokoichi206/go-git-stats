@@ -1,4 +1,4 @@
-package api
+package api_test
 
 // 5 data for repositories
 const mockRepositories = `[
