@@ -37,7 +37,7 @@ func TestWeeklyCommitActivity(t *testing.T) {
 	}{
 		{
 			name:     "OK",
-			fullName: "kokoichi206",
+			fullName: "kokoichi206/go-git-stats",
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusOK, mockCodeFrequencies)
 			},
@@ -74,13 +74,18 @@ func TestWeeklyCommitActivity(t *testing.T) {
 				}
 				require.True(t, hasAccept)
 				require.True(t, hasToken)
+				// Assert URL
+				require.Equal(t, ts.url.Path, "/repos/kokoichi206/go-git-stats/stats/code_frequency")
+
+				// Api was called only once
+				require.Equal(t, 1, ts.apiCalled)
 			},
 			tearDown: func() {
 			},
 		},
 		{
 			name:     "Error NewRequest",
-			fullName: "kokoichi206",
+			fullName: "kokoichi206/go-git-stats",
 			setup: func(testServer *httptest.Server) {
 				api.config.ApiBaseURL = "https://test.ser ver.com"
 				ts.server.Config.Handler = ts.NewRouter(http.StatusNotFound, "")
@@ -92,6 +97,29 @@ func TestWeeklyCommitActivity(t *testing.T) {
 				require.True(t, strings.Contains(err.Error(), "http.NewRequest"))
 				t.Log(frequencies)
 				require.Nil(t, frequencies)
+
+				// Api was NOT called
+				require.Equal(t, 0, ts.apiCalled)
+			},
+			tearDown: func() {
+				api.config.ApiBaseURL = ts.server.URL
+			},
+		},
+		{
+			name:     "Error not http scheme",
+			fullName: "kokoichi206/go-git-stats",
+			setup: func(testServer *httptest.Server) {
+				t.Log(api.config.ApiBaseURL)
+				api.config.ApiBaseURL = "slack://should.return.client.do.err"
+				t.Log(api.config.ApiBaseURL)
+			},
+			assertion: func(t *testing.T, err error, frequencies []CodeFrequency) {
+				require.Error(t, err)
+				t.Log(err)
+				require.Equal(t, "failed to client.Do after several retries.", err.Error())
+
+				// Api was NOT called
+				require.Equal(t, 0, ts.apiCalled)
 			},
 			tearDown: func() {
 				api.config.ApiBaseURL = ts.server.URL
@@ -109,13 +137,35 @@ func TestWeeklyCommitActivity(t *testing.T) {
 				require.True(t, strings.Contains(err.Error(), "client.Do"))
 				t.Log(frequencies)
 				require.Nil(t, frequencies)
+
+				// Api was called only once
+				require.Equal(t, 1, ts.apiCalled)
+			},
+			tearDown: func() {
+			},
+		},
+		{
+			name:     "Error after retry",
+			fullName: "kokoichi206/go-git-stats",
+			setup: func(testServer *httptest.Server) {
+				ts.server.Config.Handler = ts.NewRouter(http.StatusInternalServerError, "")
+			},
+			assertion: func(t *testing.T, err error, frequencies []CodeFrequency) {
+
+				require.Error(t, err)
+				require.Equal(t, "failed to client.Do after several retries.", err.Error())
+				t.Log(frequencies)
+				require.Nil(t, frequencies)
+
+				// Api was called 3 times! (and failed...)
+				require.Equal(t, 3, ts.apiCalled)
 			},
 			tearDown: func() {
 			},
 		},
 		{
 			name:     "Unmarshal failed with incomplete data",
-			fullName: "kokoichi206",
+			fullName: "kokoichi206/go-git-stats",
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusOK, codeFrequenciesUnmarshalError)
 			},
@@ -138,6 +188,7 @@ func TestWeeklyCommitActivity(t *testing.T) {
 			// Arrange
 			tc.setup(ts.server)
 			defer tc.tearDown()
+			defer ts.Init()
 
 			// Act
 			t.Log(api)

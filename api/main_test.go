@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -10,13 +9,13 @@ import (
 )
 
 type TestServer struct {
-	server *httptest.Server
-	header http.Header
-	url    *url.URL
+	server    *httptest.Server
+	header    http.Header
+	url       *url.URL
+	apiCalled int
 }
 
 func (ts *TestServer) NewRouter(statusCode int, mockData string) http.Handler {
-	fmt.Println("ehhorahora")
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(statusCode)
 		w.Write([]byte(mockData))
@@ -24,9 +23,18 @@ func (ts *TestServer) NewRouter(statusCode int, mockData string) http.Handler {
 		ts.url = r.URL
 		// Save passed header
 		ts.header = r.Header
+
+		// Check how many times is the API called
+		ts.apiCalled += 1
 	})
 
 	return handler
+}
+
+func (ts *TestServer) Init() {
+	ts.header = nil
+	ts.url = nil
+	ts.apiCalled = 0
 }
 
 func TestMain(m *testing.M) {

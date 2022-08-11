@@ -17,8 +17,9 @@ func TestListPublicRepositories(t *testing.T) {
 	defer s.Close()
 
 	ts := TestServer{
-		server: s,
-		header: nil,
+		server:    s,
+		header:    nil,
+		apiCalled: 0,
 	}
 
 	config := util.Config{
@@ -57,6 +58,21 @@ func TestListPublicRepositories(t *testing.T) {
 				}
 				t.Log(ts.url)
 				require.Equal(t, "/users/kokoichi206/repos", ts.url.Path)
+
+				// Assert header
+				passedHeader := ts.header
+				t.Log(passedHeader)
+				require.NotNil(t, passedHeader)
+				hasAccept := false
+				for key, values := range passedHeader {
+					if key == "Accept" && values[0] == "application/vnd.github+json" {
+						hasAccept = true
+					}
+				}
+				require.True(t, hasAccept)
+
+				// Api was called only once
+				require.Equal(t, 1, ts.apiCalled)
 			},
 			tearDown: func() {
 			},
@@ -76,6 +92,30 @@ func TestListPublicRepositories(t *testing.T) {
 				require.True(t, strings.Contains(err.Error(), "http.NewRequest"))
 				t.Log(repositories)
 				require.Nil(t, repositories)
+
+				// Api was NOT called
+				require.Equal(t, 0, ts.apiCalled)
+			},
+			tearDown: func() {
+				api.config.ApiBaseURL = ts.server.URL
+			},
+		},
+		{
+			name:     "Error not http scheme",
+			userName: "kokoichi206",
+			setup: func(testServer *httptest.Server) {
+				t.Log(api.config.ApiBaseURL)
+				api.config.ApiBaseURL = "slack://should.return.client.do.err"
+				t.Log(api.config.ApiBaseURL)
+			},
+			assertion: func(t *testing.T, err error, repositories []Repository) {
+
+				require.Error(t, err)
+				t.Log(err)
+				require.Equal(t, "failed to client.Do after several retries.", err.Error())
+
+				// Api was NOT called
+				require.Equal(t, 0, ts.apiCalled)
 			},
 			tearDown: func() {
 				api.config.ApiBaseURL = ts.server.URL
@@ -96,6 +136,26 @@ func TestListPublicRepositories(t *testing.T) {
 
 				t.Log(ts.url)
 				require.Equal(t, "/users/notFoundUser/repos", ts.url.Path)
+
+				// Api was called only once
+				require.Equal(t, 1, ts.apiCalled)
+			},
+			tearDown: func() {
+			},
+		},
+		{
+			name:     "Error after retry",
+			userName: "kokoichi206",
+			setup: func(testServer *httptest.Server) {
+				ts.server.Config.Handler = ts.NewRouter(http.StatusInternalServerError, "")
+			},
+			assertion: func(t *testing.T, err error, repositories []Repository) {
+
+				require.Error(t, err)
+				require.True(t, strings.Contains(err.Error(), "failed to client.Do after several retries."))
+
+				// Api was called 3 times! (and failed...)
+				require.Equal(t, 3, ts.apiCalled)
 			},
 			tearDown: func() {
 			},
@@ -115,6 +175,9 @@ func TestListPublicRepositories(t *testing.T) {
 
 				t.Log(ts.url)
 				require.Equal(t, "/users/kokoichi206/repos", ts.url.Path)
+
+				// Api was called only once
+				require.Equal(t, 1, ts.apiCalled)
 			},
 			tearDown: func() {
 			},
@@ -128,6 +191,7 @@ func TestListPublicRepositories(t *testing.T) {
 			// Arrange
 			tc.setup(ts.server)
 			defer tc.tearDown()
+			defer ts.Init()
 
 			// Act
 			repositories, err := api.ListPublicRepositories(tc.userName)
@@ -144,8 +208,9 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 	defer s.Close()
 
 	ts := TestServer{
-		server: s,
-		header: nil,
+		server:    s,
+		header:    nil,
+		apiCalled: 0,
 	}
 
 	config := util.Config{
@@ -200,6 +265,9 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 				}
 				require.True(t, hasAccept)
 				require.True(t, hasToken)
+
+				// Api was called only once
+				require.Equal(t, 1, ts.apiCalled)
 			},
 			tearDown: func() {
 			},
@@ -218,6 +286,27 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 				require.True(t, strings.Contains(err.Error(), "http.NewRequest"))
 				t.Log(repositories)
 				require.Nil(t, repositories)
+
+				// Api was NOT called
+				require.Equal(t, 0, ts.apiCalled)
+			},
+			tearDown: func() {
+				api.config.ApiBaseURL = ts.server.URL
+			},
+		},
+		{
+			name:     "Error not http scheme",
+			userName: "kokoichi206",
+			setup: func(testServer *httptest.Server) {
+				t.Log(api.config.ApiBaseURL)
+				api.config.ApiBaseURL = "slack://should.return.client.do.err"
+				t.Log(api.config.ApiBaseURL)
+			},
+			assertion: func(t *testing.T, err error, repositories []Repository) {
+
+				require.Error(t, err)
+				t.Log(err)
+				require.Equal(t, "failed to client.Do after several retries.", err.Error())
 			},
 			tearDown: func() {
 				api.config.ApiBaseURL = ts.server.URL
@@ -235,6 +324,26 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 				require.True(t, strings.Contains(err.Error(), "client.Do"))
 				t.Log(repositories)
 				require.Nil(t, repositories)
+
+				// Api was called only once
+				require.Equal(t, 1, ts.apiCalled)
+			},
+			tearDown: func() {
+			},
+		},
+		{
+			name:     "Error after retry",
+			userName: "kokoichi206",
+			setup: func(testServer *httptest.Server) {
+				ts.server.Config.Handler = ts.NewRouter(http.StatusInternalServerError, "")
+			},
+			assertion: func(t *testing.T, err error, repositories []Repository) {
+
+				require.Error(t, err)
+				require.True(t, strings.Contains(err.Error(), "failed to client.Do after several retries."))
+
+				// Api was called 3 times! (and failed ...)
+				require.Equal(t, 3, ts.apiCalled)
 			},
 			tearDown: func() {
 			},
@@ -251,6 +360,10 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 				require.True(t, strings.Contains(err.Error(), "json.Unmarshal"))
 				t.Log(repositories)
 				require.Nil(t, repositories)
+
+				// Api was called only once
+				require.Equal(t, 1, ts.apiCalled)
+
 			},
 			tearDown: func() {
 			},
@@ -264,6 +377,7 @@ func TestListRepositoriesForAuthenticatedUser(t *testing.T) {
 			// Arrange
 			tc.setup(ts.server)
 			defer tc.tearDown()
+			defer ts.Init()
 
 			// Act
 			t.Log(api)
