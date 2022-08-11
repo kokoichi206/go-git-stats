@@ -20,7 +20,13 @@ var (
 
 func main() {
 
-	config := util.LoadConfig()
+	config, err := util.LoadConfig()
+	if err != nil {
+		fmt.Println(err.Error())
+		// When the configuration error occures, the following steps should not be executed.
+		os.Exit(1)
+	}
+
 	api := api.New(config)
 
 	wg := sync.WaitGroup{}
