@@ -1,10 +1,11 @@
-package cmd
+package cmd_test
 
 import (
 	"testing"
 
 	"github.com/kokoichi206/go-git-stats/api"
 	"github.com/kokoichi206/go-git-stats/api/mock"
+	"github.com/kokoichi206/go-git-stats/cmd"
 	"github.com/kokoichi206/go-git-stats/util"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"
@@ -15,10 +16,7 @@ func TestCommand(t *testing.T) {
 	config, _ := util.LoadConfig()
 	mockApi := mock.New(config)
 
-	c := Cmd{
-		Config: config,
-		Api:    mockApi,
-	}
+	c := cmd.ExportNewCommandWithMock(config, mockApi)
 
 	app := cli.NewApp()
 	app.Commands = c.NewCommands()
@@ -34,7 +32,7 @@ func TestCommand(t *testing.T) {
 			name:     "OK with access token",
 			commands: []string{"", "repo"},
 			setup: func() {
-				c.Config.Token = "TokenString"
+				c.ExportSetToken("TokenString")
 				mockApi.ListRepos = []api.Repository{
 					{
 						ID:       489517307,
@@ -50,7 +48,6 @@ func TestCommand(t *testing.T) {
 				require.True(t, api.AuthenticatedCalled)
 			},
 			tearDown: func() {
-				c.Config.Token = ""
 				mockApi.InitMock()
 			},
 		},
@@ -58,7 +55,7 @@ func TestCommand(t *testing.T) {
 			name:     "OK with user name",
 			commands: []string{"", "repo", "-name", "kokoichi206"},
 			setup: func() {
-				c.Config.Token = ""
+				c.ExportSetToken("")
 				mockApi.ListRepos = []api.Repository{
 					{
 						ID:       489517307,
@@ -70,19 +67,19 @@ func TestCommand(t *testing.T) {
 			},
 			assertion: func(t *testing.T, err error, api *mock.MockApi) {
 				require.NoError(t, err)
+				t.Log(mockApi)
 				require.True(t, api.PublicCalled)
 				require.False(t, api.AuthenticatedCalled)
 			},
 			tearDown: func() {
-				c.Config.Token = ""
 				mockApi.InitMock()
+				c.ExportInit()
 			},
 		},
 		{
 			name:     "abbr of subcommand",
 			commands: []string{"", "r", "-name", "kokoichi206"},
 			setup: func() {
-				c.Config.Token = ""
 				mockApi.ListRepos = []api.Repository{
 					{
 						ID:       489517307,
@@ -98,15 +95,14 @@ func TestCommand(t *testing.T) {
 				require.False(t, api.AuthenticatedCalled)
 			},
 			tearDown: func() {
-				c.Config.Token = ""
 				mockApi.InitMock()
+				c.ExportInit()
 			},
 		},
 		{
 			name:     "abbr of name flag",
 			commands: []string{"", "repo", "-n", "kokoichi206"},
 			setup: func() {
-				c.Config.Token = ""
 				mockApi.ListRepos = []api.Repository{
 					{
 						ID:       489517307,
@@ -122,15 +118,14 @@ func TestCommand(t *testing.T) {
 				require.False(t, api.AuthenticatedCalled)
 			},
 			tearDown: func() {
-				c.Config.Token = ""
 				mockApi.InitMock()
+				c.ExportInit()
 			},
 		},
 		{
 			name:     "Token or userName is not given",
 			commands: []string{"", "repo"},
 			setup: func() {
-				c.Config.Token = ""
 				mockApi.ListRepos = []api.Repository{
 					{
 						ID:       489517307,
@@ -147,8 +142,8 @@ func TestCommand(t *testing.T) {
 				require.False(t, api.AuthenticatedCalled)
 			},
 			tearDown: func() {
-				c.Config.Token = ""
 				mockApi.InitMock()
+				c.ExportInit()
 			},
 		},
 	}

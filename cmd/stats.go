@@ -32,7 +32,7 @@ func (c *Cmd) getStatistics(cc *cli.Context) error {
 		return errors.New("name flag is not given.")
 	}
 
-	rs, err := c.Api.WeeklyCommitActivity(fullName)
+	rs, err := c.api.WeeklyCommitActivity(fullName)
 	if err != nil {
 		fmt.Println(err)
 		return err

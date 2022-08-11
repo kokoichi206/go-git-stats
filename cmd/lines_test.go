@@ -1,14 +1,14 @@
-package cmd
+package cmd_test
 
 import (
 	"io"
 	"os"
 	"strings"
-	"sync"
 	"testing"
 
 	"github.com/kokoichi206/go-git-stats/api"
 	"github.com/kokoichi206/go-git-stats/api/mock"
+	"github.com/kokoichi206/go-git-stats/cmd"
 	"github.com/kokoichi206/go-git-stats/util"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"
@@ -19,12 +19,7 @@ func TestLinesCommand(t *testing.T) {
 	config, _ := util.LoadConfig()
 	mockApi := mock.New(config)
 
-	c := Cmd{
-		Config: config,
-		Api:    mockApi,
-		Wait:   &sync.WaitGroup{},
-		Mutex:  &sync.Mutex{},
-	}
+	c := cmd.ExportNewCommandWithMock(config, mockApi)
 
 	app := cli.NewApp()
 	app.Commands = c.NewCommands()
@@ -40,8 +35,6 @@ func TestLinesCommand(t *testing.T) {
 			name:     "OK",
 			commands: []string{"", "lines", "-n", "kokoichi206"},
 			setup: func() {
-				c.total = 0
-				c.Config.Token = ""
 				mockApi.ListRepos = []api.Repository{
 					{
 						ID:       489517307,
@@ -81,7 +74,7 @@ func TestLinesCommand(t *testing.T) {
 				require.True(t, api.PublicCalled)
 				require.False(t, api.AuthenticatedCalled)
 				require.True(t, api.WeeklyCodeCalled)
-				require.Equal(t, 101501, c.total)
+				require.Equal(t, 101501, c.ExportGetTotal())
 
 				// Sum of lines of codes
 				t.Log(output)
@@ -89,14 +82,14 @@ func TestLinesCommand(t *testing.T) {
 			},
 			tearDown: func() {
 				mockApi.InitMock()
+				c.ExportInit()
 			},
 		},
 		{
 			name:     "OK with token",
 			commands: []string{"", "lines"},
 			setup: func() {
-				c.total = 0
-				c.Config.Token = "ghq_foobartoken"
+				c.ExportSetToken("ghq_foobartoken")
 				mockApi.ListCodeFreq = nil
 				mockApi.ListRepos = []api.Repository{
 					{
@@ -132,7 +125,7 @@ func TestLinesCommand(t *testing.T) {
 				require.False(t, api.PublicCalled)
 				require.True(t, api.AuthenticatedCalled)
 				require.True(t, api.WeeklyCodeCalled)
-				require.Equal(t, 20100000, c.total)
+				require.Equal(t, 20100000, c.ExportGetTotal())
 
 				// Sum of lines of codes
 				t.Log(output)
@@ -140,21 +133,19 @@ func TestLinesCommand(t *testing.T) {
 			},
 			tearDown: func() {
 				mockApi.InitMock()
+				c.ExportInit()
 			},
 		},
 		{
 			name:     "Without token and username",
 			commands: []string{"", "lines"},
-			setup: func() {
-				c.total = 0
-				c.Config.Token = ""
-			},
+			setup:    func() {},
 			assertion: func(t *testing.T, err error, api *mock.MockApi, output string) {
 				require.NoError(t, err)
 				require.False(t, api.PublicCalled)
 				require.False(t, api.AuthenticatedCalled)
 				require.False(t, api.WeeklyCodeCalled)
-				require.Equal(t, 0, c.total)
+				require.Equal(t, 0, c.ExportGetTotal())
 
 				// Sum of lines of codes
 				t.Log(output)
@@ -162,6 +153,7 @@ func TestLinesCommand(t *testing.T) {
 			},
 			tearDown: func() {
 				mockApi.InitMock()
+				c.ExportInit()
 			},
 		},
 	}

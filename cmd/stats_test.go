@@ -1,4 +1,4 @@
-package cmd
+package cmd_test
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/kokoichi206/go-git-stats/api"
 	"github.com/kokoichi206/go-git-stats/api/mock"
+	"github.com/kokoichi206/go-git-stats/cmd"
 	"github.com/kokoichi206/go-git-stats/util"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v2"
@@ -16,10 +17,7 @@ func TestStatsCommand(t *testing.T) {
 	config, _ := util.LoadConfig()
 	mockApi := mock.New(config)
 
-	c := Cmd{
-		Config: config,
-		Api:    mockApi,
-	}
+	c := cmd.ExportNewCommandWithMock(config, mockApi)
 
 	app := cli.NewApp()
 	app.Commands = c.NewCommands()
@@ -35,7 +33,6 @@ func TestStatsCommand(t *testing.T) {
 			name:     "OK",
 			commands: []string{"", "stats", "-name", "kokoichi206/go-git-stats"},
 			setup: func() {
-				c.total = 0
 				mockApi.ListCodeFreq = append(mockApi.ListCodeFreq, []api.CodeFrequency{
 					{
 						Time:      1659830400,
@@ -51,6 +48,7 @@ func TestStatsCommand(t *testing.T) {
 			},
 			tearDown: func() {
 				mockApi.InitMock()
+				c.ExportInit()
 			},
 		},
 		{

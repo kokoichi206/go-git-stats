@@ -27,9 +27,9 @@ func (c *Cmd) RepoCommand() *cli.Command {
 //	 the target is public repositories (specify username as a "name" flag).
 func (c *Cmd) getRepositories(cc *cli.Context) error {
 	// With Github access token
-	token := c.Config.Token
+	token := c.config.Token
 	if token != "" {
-		rs, err := c.Api.ListRepositoriesForAuthenticatedUser()
+		rs, err := c.api.ListRepositoriesForAuthenticatedUser()
 		if err != nil {
 			return err
 		}
@@ -42,7 +42,7 @@ func (c *Cmd) getRepositories(cc *cli.Context) error {
 	// With username
 	useName := cc.String("name")
 	if useName != "" {
-		rs, err := c.Api.ListPublicRepositories(useName)
+		rs, err := c.api.ListPublicRepositories(useName)
 		if err != nil {
 			return err
 		}
