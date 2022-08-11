@@ -1,10 +1,11 @@
-package util
+package util_test
 
 import (
 	"fmt"
 	"os"
 	"testing"
 
+	"github.com/kokoichi206/go-git-stats/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,7 +14,7 @@ func TestLoadConfig(t *testing.T) {
 	testCases := []struct {
 		name      string
 		setup     func()
-		assertion func(t *testing.T, config Config, err error)
+		assertion func(t *testing.T, config util.Config, err error)
 		tearDown  func()
 	}{
 		{
@@ -21,7 +22,7 @@ func TestLoadConfig(t *testing.T) {
 			setup: func() {
 				os.Setenv("GGS_TOKEN", "ghq_q5k0u9YD8JPHVIUckyx4dKDyvGavdJWHR44D")
 			},
-			assertion: func(t *testing.T, config Config, err error) {
+			assertion: func(t *testing.T, config util.Config, err error) {
 				t.Log(config)
 				// GitHub REST API
 				require.Equal(t, "https://api.github.com", config.ApiBaseURL)
@@ -35,7 +36,7 @@ func TestLoadConfig(t *testing.T) {
 		{
 			name:  "OK without token",
 			setup: func() {},
-			assertion: func(t *testing.T, config Config, err error) {
+			assertion: func(t *testing.T, config util.Config, err error) {
 				t.Log(config)
 				// GitHub REST API
 				require.Equal(t, "https://api.github.com", config.ApiBaseURL)
@@ -49,7 +50,7 @@ func TestLoadConfig(t *testing.T) {
 			setup: func() {
 				os.Setenv("GGS_TOKEN", "invalid_token")
 			},
-			assertion: func(t *testing.T, config Config, err error) {
+			assertion: func(t *testing.T, config util.Config, err error) {
 				t.Log(config)
 				require.Equal(t, "", config.ApiBaseURL)
 				require.Equal(t, "", config.Token)
@@ -71,7 +72,7 @@ func TestLoadConfig(t *testing.T) {
 			defer tc.tearDown()
 
 			// Act
-			config, err := LoadConfig()
+			config, err := util.LoadConfig()
 
 			// Assert
 			tc.assertion(t, config, err)
@@ -120,7 +121,7 @@ func TestIsValidFormat(t *testing.T) {
 			// Arrange
 
 			// Act
-			result := isValidFormat(tc.token)
+			result := util.IsValidFormat(tc.token)
 
 			// Assert
 			require.Equal(t, tc.expected, result)
