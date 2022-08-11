@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sync"
 
 	"github.com/kokoichi206/go-git-stats/api"
 	"github.com/kokoichi206/go-git-stats/cmd"
@@ -28,16 +27,7 @@ func main() {
 	}
 
 	api := api.New(config)
-
-	wg := sync.WaitGroup{}
-	m := sync.Mutex{}
-
-	cmd := cmd.Cmd{
-		Config: config,
-		Api:    api,
-		Wait:   &wg,
-		Mutex:  &m,
-	}
+	cmd := cmd.New(config, api)
 
 	app := newApp(cmd)
 

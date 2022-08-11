@@ -10,11 +10,22 @@ import (
 
 // struct that has information related to subcommands
 type Cmd struct {
-	Config util.Config
-	Api    api.ApiCaller
-	Wait   *sync.WaitGroup
-	Mutex  *sync.Mutex
+	config util.Config
+	api    api.ApiCaller
+	wait   *sync.WaitGroup
+	mutex  *sync.Mutex
 	total  int
+}
+
+func New(config util.Config, api api.ApiCaller) Cmd {
+
+	return Cmd{
+		config: config,
+		api:    api,
+		wait:   &sync.WaitGroup{},
+		mutex:  &sync.Mutex{},
+		total:  0,
+	}
 }
 
 // Get all commands.

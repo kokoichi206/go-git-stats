@@ -27,9 +27,9 @@ func (c *Cmd) getLinesOfCodes(cc *cli.Context) error {
 	var err error
 
 	// With Github access token
-	token := c.Config.Token
+	token := c.config.Token
 	if token != "" {
-		repositories, err = c.Api.ListRepositoriesForAuthenticatedUser()
+		repositories, err = c.api.ListRepositoriesForAuthenticatedUser()
 		if err != nil {
 			return err
 		}
@@ -38,17 +38,17 @@ func (c *Cmd) getLinesOfCodes(cc *cli.Context) error {
 	// With username
 	userName := cc.String("name")
 	if userName != "" {
-		repositories, err = c.Api.ListPublicRepositories(userName)
+		repositories, err = c.api.ListPublicRepositories(userName)
 		if err != nil {
 			return err
 		}
 	}
 
-	c.Wait.Add(len(repositories))
+	c.wait.Add(len(repositories))
 	for _, repository := range repositories {
 		go c.WeeklyCommitActivityAsyncCall(repository.FullName)
 	}
-	c.Wait.Wait()
+	c.wait.Wait()
 
 	// Final output
 	fmt.Println(c.total)
@@ -59,10 +59,10 @@ func (c *Cmd) getLinesOfCodes(cc *cli.Context) error {
 func (c *Cmd) WeeklyCommitActivityAsyncCall(fullName string) {
 
 	// Always decrements the WaitGroup counter.
-	defer c.Wait.Done()
+	defer c.wait.Done()
 
 	// Call function
-	stats, err := c.Api.WeeklyCommitActivity(fullName)
+	stats, err := c.api.WeeklyCommitActivity(fullName)
 	if err != nil {
 		return
 	}
@@ -74,9 +74,9 @@ func (c *Cmd) WeeklyCommitActivityAsyncCall(fullName string) {
 	}
 
 	// Add to total lines of codes.
-	c.Mutex.Lock()
+	c.mutex.Lock()
 	c.total += total
-	c.Mutex.Unlock()
+	c.mutex.Unlock()
 
 	return
 }

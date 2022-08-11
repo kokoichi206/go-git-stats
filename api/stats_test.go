@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"net/http"
@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kokoichi206/go-git-stats/api"
 	"github.com/kokoichi206/go-git-stats/util"
 	"github.com/stretchr/testify/require"
 )
@@ -24,15 +25,13 @@ func TestWeeklyCommitActivity(t *testing.T) {
 		ApiBaseURL: ts.server.URL,
 		Token:      "ghq_kokoichi206token",
 	}
-	api := Api{
-		config: config,
-	}
+	a := api.ExportNewApi(config)
 
 	testCases := []struct {
 		name      string
 		fullName  string
 		setup     func(testServer *httptest.Server)
-		assertion func(t *testing.T, err error, frequencies []CodeFrequency)
+		assertion func(t *testing.T, err error, frequencies []api.CodeFrequency)
 		tearDown  func()
 	}{
 		{
@@ -41,7 +40,7 @@ func TestWeeklyCommitActivity(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusOK, mockCodeFrequencies)
 			},
-			assertion: func(t *testing.T, err error, frequencies []CodeFrequency) {
+			assertion: func(t *testing.T, err error, frequencies []api.CodeFrequency) {
 
 				require.NoError(t, err)
 				t.Log(frequencies)
@@ -87,10 +86,10 @@ func TestWeeklyCommitActivity(t *testing.T) {
 			name:     "Error NewRequest",
 			fullName: "kokoichi206/go-git-stats",
 			setup: func(testServer *httptest.Server) {
-				api.config.ApiBaseURL = "https://test.ser ver.com"
+				a.ExportSetURL("https://test.ser ver.com")
 				ts.server.Config.Handler = ts.NewRouter(http.StatusNotFound, "")
 			},
-			assertion: func(t *testing.T, err error, frequencies []CodeFrequency) {
+			assertion: func(t *testing.T, err error, frequencies []api.CodeFrequency) {
 
 				require.Error(t, err)
 				t.Log(err)
@@ -102,18 +101,18 @@ func TestWeeklyCommitActivity(t *testing.T) {
 				require.Equal(t, 0, ts.apiCalled)
 			},
 			tearDown: func() {
-				api.config.ApiBaseURL = ts.server.URL
+				a.ExportSetURL(ts.server.URL)
 			},
 		},
 		{
 			name:     "Error not http scheme",
 			fullName: "kokoichi206/go-git-stats",
 			setup: func(testServer *httptest.Server) {
-				t.Log(api.config.ApiBaseURL)
-				api.config.ApiBaseURL = "slack://should.return.client.do.err"
-				t.Log(api.config.ApiBaseURL)
+				t.Log(a.ExportGetConfig())
+				a.ExportSetURL("slack://should.return.client.do.err")
+				t.Log(a.ExportGetConfig())
 			},
-			assertion: func(t *testing.T, err error, frequencies []CodeFrequency) {
+			assertion: func(t *testing.T, err error, frequencies []api.CodeFrequency) {
 				require.Error(t, err)
 				t.Log(err)
 				require.Equal(t, "failed to client.Do after several retries.", err.Error())
@@ -122,7 +121,7 @@ func TestWeeklyCommitActivity(t *testing.T) {
 				require.Equal(t, 0, ts.apiCalled)
 			},
 			tearDown: func() {
-				api.config.ApiBaseURL = ts.server.URL
+				a.ExportSetURL(ts.server.URL)
 			},
 		},
 		{
@@ -131,7 +130,7 @@ func TestWeeklyCommitActivity(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusNotFound, "")
 			},
-			assertion: func(t *testing.T, err error, frequencies []CodeFrequency) {
+			assertion: func(t *testing.T, err error, frequencies []api.CodeFrequency) {
 
 				require.Error(t, err)
 				require.True(t, strings.Contains(err.Error(), "client.Do"))
@@ -150,7 +149,7 @@ func TestWeeklyCommitActivity(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusInternalServerError, "")
 			},
-			assertion: func(t *testing.T, err error, frequencies []CodeFrequency) {
+			assertion: func(t *testing.T, err error, frequencies []api.CodeFrequency) {
 
 				require.Error(t, err)
 				require.Equal(t, "failed to client.Do after several retries.", err.Error())
@@ -169,7 +168,7 @@ func TestWeeklyCommitActivity(t *testing.T) {
 			setup: func(testServer *httptest.Server) {
 				ts.server.Config.Handler = ts.NewRouter(http.StatusOK, codeFrequenciesUnmarshalError)
 			},
-			assertion: func(t *testing.T, err error, frequencies []CodeFrequency) {
+			assertion: func(t *testing.T, err error, frequencies []api.CodeFrequency) {
 
 				require.Error(t, err)
 				require.True(t, strings.Contains(err.Error(), "json.Unmarshal"))
@@ -188,11 +187,10 @@ func TestWeeklyCommitActivity(t *testing.T) {
 			// Arrange
 			tc.setup(ts.server)
 			defer tc.tearDown()
-			defer ts.Init()
+			defer ts.init()
 
 			// Act
-			t.Log(api)
-			frequencies, err := api.WeeklyCommitActivity(tc.fullName)
+			frequencies, err := a.WeeklyCommitActivity(tc.fullName)
 
 			// Assert
 			tc.assertion(t, err, frequencies)

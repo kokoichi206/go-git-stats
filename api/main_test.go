@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"net/http"
@@ -31,7 +31,7 @@ func (ts *TestServer) NewRouter(statusCode int, mockData string) http.Handler {
 	return handler
 }
 
-func (ts *TestServer) Init() {
+func (ts *TestServer) init() {
 	ts.header = nil
 	ts.url = nil
 	ts.apiCalled = 0
