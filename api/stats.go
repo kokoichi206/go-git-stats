@@ -32,25 +32,44 @@ func (a *Api) WeeklyCommitActivity(fullName string) ([]CodeFrequency, error) {
 	}
 
 	var resp *http.Response
+	success := false
 	for retries > 0 {
+		// > If the returned error is nil, the Response will contain a non-nil
+		// > Body which the user is expected to close.
 		resp, err = client.Do(req)
 
-		// If the StatusCode starts with 4, it is user's error,
-		// so it should not be retried.
+		if err != nil {
+			// Invalid URL (Like different scheme) etc.
+			retries -= 1
+			continue
+		}
+
+		if resp.StatusCode == http.StatusOK {
+			// Success!
+			success = true
+			break
+		}
+
 		if resp.StatusCode/100 == 4 {
+			// If the StatusCode starts with 4, it is user's error,
+			// so it should not be retried.
 			return nil, fmt.Errorf("failed to client.Do: StatusCode is %d", resp.StatusCode)
 		}
 
-		if resp.StatusCode == 202 {
+		if resp.StatusCode == http.StatusCreated {
 			// Failed to find cache and GitHub started to create statistics.
 			// Sleep some time and retry.
+			//
+			// See GitHub documentation: https://docs.github.com/en/rest/metrics/statistics#a-word-about-caching
 			time.Sleep(waitSeconds)
-		} else if err != nil {
-			retries -= 1
-		} else {
-			// Success!
-			break
+			continue
 		}
+
+		retries -= 1
+	}
+
+	if !success {
+		return nil, fmt.Errorf("failed to client.Do after several retries.")
 	}
 
 	body, err := io.ReadAll(resp.Body)
