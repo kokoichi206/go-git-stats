@@ -64,9 +64,17 @@ Built binaries are available from GitHub Releases.
 
 https://github.com/kokoichi206/go-git-stats/releases
 
+### How to install
+
+**MacOS, Linux**
+
+```sh
+curl -Lsf https://raw.githubusercontent.com/kokoichi206/go-git-stats/main/scripts/installer | bash
+```
+
 ### How to set environment varialbe
 
-**Linux**
+**MacOS, Linux**
 
 ```sh
 # Write these two commands to .bashrc, .zshrc or etc. if you want.
