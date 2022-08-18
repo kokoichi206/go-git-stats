@@ -69,7 +69,7 @@ https://github.com/kokoichi206/go-git-stats/releases
 **MacOS, Linux**
 
 ```sh
-curl -Lsf https://raw.githubusercontent.com/kokoichi206/go-git-stats/main/scripts/installer | bash
+curl -Lsf https://raw.githubusercontent.com/kokoichi206/go-git-stats/main/scripts/installer.sh | bash
 ```
 
 ### How to set environment varialbe

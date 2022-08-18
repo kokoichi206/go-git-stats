@@ -19,9 +19,9 @@ function exit_handler() {
     else
         echo "Installed correctly."
     fi
-	if [ -d "${WORKING_DIR}" ]; then
-		rm -r "${WORKING_DIR}"
-	fi
+    if [ -d "${WORKING_DIR}" ]; then
+        rm -r "${WORKING_DIR}"
+    fi
 }
 trap exit_handler EXIT
 
@@ -29,12 +29,12 @@ RELEASE_URL="https://github.com/kokoichi206/go-git-stats/releases"
 # /latest redirects to the newest tag url
 ## VERSION format is x.x.x
 VERSION="$(curl -sfL -o /dev/null -w %{url_effective} ${RELEASE_URL}/latest |\
-	grep -o '[0-9]\.[0-9]\.[0-9]')"
+    grep -o '[0-9]\.[0-9]\.[0-9]')"
 exit_status=$?
 if [ "${exit_status}" -ne 0 ]; then
-	echo "Failed to get the latest version."
-	echo "Please check ${RELEASE_URL}."
-	exit 1
+    echo "Failed to get the latest version."
+    echo "Please check ${RELEASE_URL}."
+    exit 1
 fi
 
 echo "Downloading ggs v${VERSION} ..."
@@ -42,9 +42,9 @@ echo "Downloading ggs v${VERSION} ..."
 mkdir "${WORKING_DIR}"
 exit_status=$?
 if [ "${exit_status}" -ne 0 ]; then
-	echo "The folder ${WORKING_DIR} already exists."
-	echo "Please remove it and try again."
-	exit 1
+    echo "The folder ${WORKING_DIR} already exists."
+    echo "Please remove it and try again."
+    exit 1
 fi
 
 # download checksums file
@@ -63,8 +63,8 @@ exit_status=$?
 cd - > /dev/null
 # If the exit status is greater than 0, it means file doesn't exist or checksum is wrong.
 if [ "${exit_status}" -ne 0 ]; then
-	echo "Something went wrong when downloading."
-	exit 1
+    echo "Something went wrong when downloading."
+    exit 1
 fi
 tar -xf "${TAR_FILE}" -C "${WORKING_DIR}"
 
