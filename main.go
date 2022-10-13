@@ -11,6 +11,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// FIXME: どこでバージョンを管理したらいい？
 const version = "0.2.0"
 
 var (
