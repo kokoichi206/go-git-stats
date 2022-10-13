@@ -68,5 +68,5 @@ if [ "${exit_status}" -ne 0 ]; then
 fi
 tar -xf "${TAR_FILE}" -C "${WORKING_DIR}"
 
-echo "ggs command will be installed to ${INSTALL_TO}."
+echo "ggs command was installed to ${INSTALL_TO}."
 sudo mv "${WORKING_DIR}/ggs" "${INSTALL_TO}"
