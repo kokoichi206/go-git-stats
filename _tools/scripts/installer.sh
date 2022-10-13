@@ -50,9 +50,14 @@ fi
 # download checksums file
 curl -sfLo "${WORKING_DIR}/checksums.txt" "${RELEASE_URL}/download/v${VERSION}/checksums.txt"
 
+# check the architecture.
+arch="$(uname -m)"
+if [ "${arch,,}" = "aarch64" ]; then
+    arch="arm64"
+fi
 # download tar.gz file
-TAR_FILE="${WORKING_DIR}/go-git-stats_${VERSION}_$(uname -s)_$(uname -m).tar.gz"
-TAR_URL="${RELEASE_URL}/download/v${VERSION}/go-git-stats_${VERSION}_$(uname -s)_$(uname -m).tar.gz"
+TAR_FILE="${WORKING_DIR}/go-git-stats_${VERSION}_$(uname -s)_${arch}.tar.gz"
+TAR_URL="${RELEASE_URL}/download/v${VERSION}/go-git-stats_${VERSION}_$(uname -s)_${arch}.tar.gz"
 curl -sfLo "${TAR_FILE}" "${TAR_URL}"
 
 # check sha value
