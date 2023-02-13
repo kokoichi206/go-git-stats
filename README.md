@@ -1,9 +1,9 @@
-# go-git-stats
-
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4)](https://pkg.go.dev/github.com/kokoichi206/go-git-stats)
 [![Go Report Card](https://goreportcard.com/badge/kokoichi206/go-git-stats)](http://goreportcard.com/report/kokoichi206/go-git-stats)
 [![Release](https://img.shields.io/github/release/kokoichi206/go-git-stats.svg?style=flat-square)](https://github.com/kokoichi206/go-git-stats/releases)
+
+# go-git-stats
 
 CLI tool for git statistics
 
@@ -70,6 +70,12 @@ Built binaries are available from GitHub Releases.
 https://github.com/kokoichi206/go-git-stats/releases
 
 ### How to install
+
+If you have Go environment, you can install via `go install`.
+
+``` sh
+go install github.com/kokoichi206/go-git-stats/cmd/ggs@latest
+```
 
 **MacOS, Linux**
 
