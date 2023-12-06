@@ -83,6 +83,17 @@ go install github.com/kokoichi206/go-git-stats/cmd/ggs@latest
 curl -Lsf https://raw.githubusercontent.com/kokoichi206/go-git-stats/main/_tools/scripts/installer.sh | bash
 ```
 
+### Get Access Token
+
+Following [this document](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#personal-access-tokens-classic), you can get personal access token (classic) which starts from `ghp_`.
+
+**Required scopes**
+
+- repo:status
+- public_repo
+
+![](docs/imgs/scopes.png)
+
 ### How to set environment varialbe
 
 **MacOS, Linux**
