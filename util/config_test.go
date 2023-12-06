@@ -20,13 +20,13 @@ func TestLoadConfig(t *testing.T) {
 		{
 			name: "OK",
 			setup: func() {
-				os.Setenv("GGS_TOKEN", "ghq_q5k0u9YD8JPHVIUckyx4dKDyvGavdJWHR44D")
+				os.Setenv("GGS_TOKEN", "ghp_q5k0u9YD8JPHVIUckyx4dKDyvGavdJWHR44D")
 			},
 			assertion: func(t *testing.T, config util.Config, err error) {
 				t.Log(config)
 				// GitHub REST API
 				require.Equal(t, "https://api.github.com", config.ApiBaseURL)
-				require.Equal(t, "ghq_q5k0u9YD8JPHVIUckyx4dKDyvGavdJWHR44D", config.Token)
+				require.Equal(t, "ghp_q5k0u9YD8JPHVIUckyx4dKDyvGavdJWHR44D", config.Token)
 				require.NoError(t, err)
 			},
 			tearDown: func() {
@@ -89,7 +89,7 @@ func TestIsValidFormat(t *testing.T) {
 	}{
 		{
 			name:     "OK",
-			token:    "ghq_6nKaaa1xmIdPQ0jU9fZwOMx97qjI6343PzoT",
+			token:    "ghp_6nKaaa1xmIdPQ0jU9fZwOMx97qjI6343PzoT",
 			expected: true,
 		},
 		{
@@ -99,7 +99,7 @@ func TestIsValidFormat(t *testing.T) {
 		},
 		{
 			name:     "NG short",
-			token:    "ghq_6nKaaa",
+			token:    "ghp_6nKaaa",
 			expected: false,
 		},
 		{

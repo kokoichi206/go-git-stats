@@ -16,7 +16,7 @@ Get all repositories.
 ```sh
 # When Github access token is set to GGS_TOKEN (environment variable)
 $ echo $GGS_TOKEN
-> ghq_....
+> ghp_....
 
 # Repositories for authenticated user with Github access token
 $ ggs repo
@@ -36,7 +36,7 @@ Get statistics of a specific repository.
 # You need to set Github access token to GGS_TOKEN (environment variable)
 # if you want to get private repopsitory stats.
 $ echo $GGS_TOKEN
-> ghq_....
+> ghp_....
 
 $ ggs stats -name kokoichi206/go-git-stats
 # abbreviation command
@@ -51,7 +51,7 @@ Get lines of codes you wrote before.
 # You need to set Github access token to GGS_TOKEN (environment variable)
 # if you want to get private repopsitory stats.
 $ echo $GGS_TOKEN
-> ghq_....
+> ghp_....
 # with access token
 $ ggs lines
 > 11930741
@@ -83,17 +83,28 @@ go install github.com/kokoichi206/go-git-stats/cmd/ggs@latest
 curl -Lsf https://raw.githubusercontent.com/kokoichi206/go-git-stats/main/_tools/scripts/installer.sh | bash
 ```
 
+### Get Access Token
+
+Following [this document](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#personal-access-tokens-classic), you can get personal access token (classic) which starts from `ghp_`.
+
+**Required scopes**
+
+- repo:status
+- public_repo
+
+![](docs/imgs/scopes.png)
+
 ### How to set environment varialbe
 
 **MacOS, Linux**
 
 ```sh
 # Write these two commands to .bashrc, .zshrc or etc. if you want.
-$ GGS_TOKEN=ghq_xxx
+$ GGS_TOKEN=ghp_xxx
 $ export GGS_TOKEN
 
 # easier way
-$ GGS_TOKEN=ghq_pienpoyon ggs <sub-command>
+$ GGS_TOKEN=ghp_pienpoyon ggs <sub-command>
 ```
 
 ## LICENSE

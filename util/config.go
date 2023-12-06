@@ -31,7 +31,7 @@ func LoadConfig() (Config, error) {
 // see: https://github.blog/2021-04-05-behind-githubs-new-authentication-token-formats/
 func isValidFormat(token string) bool {
 	// Token format
-	const TokenRegex = `^ghq_[a-zA-Z0-9]{36}$`
+	const TokenRegex = `^ghp_[a-zA-Z0-9]{36}$`
 
 	// empty token means that the token has been not set, so it should be true
 	if token == "" {
